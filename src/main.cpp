@@ -15,12 +15,14 @@
 using namespace cv;
 using namespace std;
 
+typedef pair<Mat, String> Params;
+
 int loopbreak = 0;
 
 void rclick_callback(int, int, int, int, void*);
 
 int main(int argc, char** argv) {
-	String path("test/*.png");
+	String path("forward_3/*.png");
 	vector<String> img_names;
 
 	glob(path, img_names, true);
@@ -53,8 +55,9 @@ int main(int argc, char** argv) {
 						&& boundRect[i].height >= minHeight) {
 					Mat coloured_img = imread(img_names[k]);
 					Mat cropImage = coloured_img(boundRect[i]);
-					imshow("Title", cropImage);
-					setMouseCallback("Title", rclick_callback, &cropImage);
+					Params params(cropImage, img_names[k]);
+					imshow(img_names[k], cropImage);
+					setMouseCallback(img_names[k], rclick_callback, &params);
 					waitKey();
 				}
 			}
@@ -65,10 +68,14 @@ int main(int argc, char** argv) {
 	return (0);
 }
 
-void rclick_callback(int event, int x, int y, int flags, void* ptrMat) {
+void rclick_callback(int event, int x, int y, int flags, void* ptr) {
 	if (event == EVENT_RBUTTONDOWN) {
-		Mat *cropImage = (Mat*) ptrMat;
-		imwrite("test_sample.png", *cropImage);
+		Params *params = (Params*) (ptr);
+		String img_title = params->second;
+		String img_name = "forward_3_output/"
+				+ img_title.substr(img_title.find("/") + 1,
+						img_title.length() - 1);
+		imwrite(img_name, params->first);
 		loopbreak = 1;
 		cout << "Image saved!" << endl;
 	}
