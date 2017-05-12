@@ -22,7 +22,7 @@ int loopbreak = 0;
 void rclick_callback(int, int, int, int, void*);
 
 int main(int argc, char** argv) {
-	String path("forward_1/*.png");
+	String path("forward_3/*.jpg");
 	vector<String> img_names;
 
 	glob(path, img_names, true);
@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
 		if (!img.empty()) {
 			Mat threshold_output;
 			/// Detect edges using Threshold
-			threshold(img, threshold_output, 60, 255, THRESH_BINARY);
+			threshold(img, threshold_output, 65, 255, THRESH_BINARY);
 
 			imshow("threshold_output", threshold_output);
 			waitKey();
@@ -54,6 +54,28 @@ int main(int argc, char** argv) {
 				if (boundRect[i].width >= minWidth
 						&& boundRect[i].height >= minHeight) {
 					Mat coloured_img = imread(img_names[k]);
+					// Faccio in modo che la bounding box sia un quadrato e la sposto in base al ridimensionamento
+					if (boundRect[i].width > boundRect[i].height) {
+						if (boundRect[i].width <= coloured_img.rows) {
+							if (boundRect[i].y
+									- (boundRect[i].width - boundRect[i].height)
+											/ 2 >= 0) {
+								boundRect[i].y -= (boundRect[i].width
+										- boundRect[i].height) / 2;
+								boundRect[i].height = boundRect[i].width;
+							}
+						}
+					} else {
+						if (boundRect[i].height <= coloured_img.cols) {
+							if (boundRect[i].x
+									- (boundRect[i].height - boundRect[i].width)
+											/ 2 >= 0) {
+								boundRect[i].x -= (boundRect[i].height
+										- boundRect[i].width) / 2;
+								boundRect[i].width = boundRect[i].height;
+							}
+						}
+					}
 					Mat cropImage = coloured_img(boundRect[i]);
 					Params params(cropImage, img_names[k]);
 					imshow(img_names[k], cropImage);
@@ -63,7 +85,6 @@ int main(int argc, char** argv) {
 			}
 		}
 	}
-
 	waitKey(0);
 	return (0);
 }
@@ -72,7 +93,7 @@ void rclick_callback(int event, int x, int y, int flags, void* ptr) {
 	if (event == EVENT_RBUTTONDOWN) {
 		Params *params = (Params*) (ptr);
 		String img_title = params->second;
-		String img_name = "forward_1_output/"
+		String img_name = "forward_3_output/"
 				+ img_title.substr(img_title.find("/") + 1,
 						img_title.length() - 1);
 		imwrite(img_name, params->first);
