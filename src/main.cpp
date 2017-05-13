@@ -22,7 +22,7 @@ int loopbreak = 0;
 void rclick_callback(int, int, int, int, void*);
 
 int main(int argc, char** argv) {
-	String path("forward_1/*.jpg");
+	String path("dataset/*.jpg");
 	vector<String> img_names;
 
 	glob(path, img_names, true);
@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
 			vector<vector<Point> > contours_poly(contours.size());
 			vector<Rect> boundRect(contours.size());
 
-			double minWidth = 90, minHeight = 90;
+			double minWidth = 20, minHeight = 20;
 			loopbreak = 0;
 			for (unsigned int i = 0; i < contours.size() && loopbreak != 1;
 					i++) {
@@ -54,9 +54,10 @@ int main(int argc, char** argv) {
 				if (boundRect[i].width >= minWidth
 						&& boundRect[i].height >= minHeight) {
 					Mat coloured_img = imread(img_names[k]);
+					//cout << boundRect[i].x << " " << boundRect[i].y << " " << boundRect[i].width << " " << boundRect[i].height << endl;
 					// Faccio in modo che la bounding box sia un quadrato e la sposto in base al ridimensionamento
 					if (boundRect[i].width > boundRect[i].height) {
-						if (boundRect[i].width <= coloured_img.rows) {
+						if (boundRect[i].y + boundRect[i].width <= coloured_img.rows) {
 							if (boundRect[i].y
 									- (boundRect[i].width - boundRect[i].height)
 											/ 2 >= 0) {
@@ -66,7 +67,7 @@ int main(int argc, char** argv) {
 							}
 						}
 					} else {
-						if (boundRect[i].height <= coloured_img.cols) {
+						if (boundRect[i].x + boundRect[i].height <= coloured_img.cols) {
 							if (boundRect[i].x
 									- (boundRect[i].height - boundRect[i].width)
 											/ 2 >= 0) {
@@ -93,7 +94,7 @@ void rclick_callback(int event, int x, int y, int flags, void* ptr) {
 	if (event == EVENT_RBUTTONDOWN) {
 		Params *params = (Params*) (ptr);
 		String img_title = params->second;
-		String img_name = "forward_1_output/"
+		String img_name = "output/"
 				+ img_title.substr(img_title.find("/") + 1,
 						img_title.length() - 1);
 		vector<int> quality_param;
