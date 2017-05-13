@@ -22,7 +22,7 @@ int loopbreak = 0;
 void rclick_callback(int, int, int, int, void*);
 
 int main(int argc, char** argv) {
-	String path("forward_3/*.jpg");
+	String path("forward_1/*.jpg");
 	vector<String> img_names;
 
 	glob(path, img_names, true);
@@ -93,10 +93,13 @@ void rclick_callback(int event, int x, int y, int flags, void* ptr) {
 	if (event == EVENT_RBUTTONDOWN) {
 		Params *params = (Params*) (ptr);
 		String img_title = params->second;
-		String img_name = "forward_3_output/"
+		String img_name = "forward_1_output/"
 				+ img_title.substr(img_title.find("/") + 1,
 						img_title.length() - 1);
-		imwrite(img_name, params->first);
+		vector<int> quality_param;
+		quality_param.push_back(CV_IMWRITE_JPEG_QUALITY);
+		quality_param.push_back(100);
+		imwrite(img_name, params->first, quality_param);
 		loopbreak = 1;
 		cout << "Image saved!" << endl;
 	}
