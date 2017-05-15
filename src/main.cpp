@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
 		if (!img.empty()) {
 			Mat threshold_output;
 			/// Detect edges using Threshold
-			threshold(img, threshold_output, 65, 255, THRESH_BINARY);
+			threshold(img, threshold_output, 85, 255, THRESH_BINARY);
 
 			imshow("threshold_output", threshold_output);
 			waitKey();
@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
 			vector<vector<Point> > contours_poly(contours.size());
 			vector<Rect> boundRect(contours.size());
 
-			double minWidth = 20, minHeight = 20;
+			double minWidth = 30, minHeight = 30;
 			loopbreak = 0;
 			for (unsigned int i = 0; i < contours.size() && loopbreak != 1;
 					i++) {
@@ -54,29 +54,6 @@ int main(int argc, char** argv) {
 				if (boundRect[i].width >= minWidth
 						&& boundRect[i].height >= minHeight) {
 					Mat coloured_img = imread(img_names[k]);
-					//cout << boundRect[i].x << " " << boundRect[i].y << " " << boundRect[i].width << " " << boundRect[i].height << endl;
-					// Faccio in modo che la bounding box sia un quadrato e la sposto in base al ridimensionamento
-					if (boundRect[i].width > boundRect[i].height) {
-						if (boundRect[i].y + boundRect[i].width <= coloured_img.rows) {
-							if (boundRect[i].y
-									- (boundRect[i].width - boundRect[i].height)
-											/ 2 >= 0) {
-								boundRect[i].y -= (boundRect[i].width
-										- boundRect[i].height) / 2;
-								boundRect[i].height = boundRect[i].width;
-							}
-						}
-					} else {
-						if (boundRect[i].x + boundRect[i].height <= coloured_img.cols) {
-							if (boundRect[i].x
-									- (boundRect[i].height - boundRect[i].width)
-											/ 2 >= 0) {
-								boundRect[i].x -= (boundRect[i].height
-										- boundRect[i].width) / 2;
-								boundRect[i].width = boundRect[i].height;
-							}
-						}
-					}
 					Mat cropImage = coloured_img(boundRect[i]);
 					Params params(cropImage, img_names[k]);
 					imshow(img_names[k], cropImage);
