@@ -19,6 +19,7 @@ typedef pair<Mat, String> Params;
 
 int loopbreak = 0;
 
+Mat GetSquareImage(const Mat& img, int);
 void rclick_callback(int, int, int, int, void*);
 
 int main(int argc, char** argv) {
@@ -31,7 +32,7 @@ int main(int argc, char** argv) {
 		if (!img.empty()) {
 			Mat threshold_output;
 			/// Detect edges using Threshold
-			threshold(img, threshold_output, 85, 255, THRESH_BINARY);
+			threshold(img, threshold_output, 65, 255, THRESH_BINARY);
 
 			imshow("threshold_output", threshold_output);
 			waitKey();
@@ -45,7 +46,7 @@ int main(int argc, char** argv) {
 			vector<vector<Point> > contours_poly(contours.size());
 			vector<Rect> boundRect(contours.size());
 
-			double minWidth = 30, minHeight = 30;
+			double minWidth = 20, minHeight = 20;
 			loopbreak = 0;
 			for (unsigned int i = 0; i < contours.size() && loopbreak != 1;
 					i++) {
@@ -54,9 +55,26 @@ int main(int argc, char** argv) {
 				if (boundRect[i].width >= minWidth
 						&& boundRect[i].height >= minHeight) {
 					Mat coloured_img = imread(img_names[k]);
+					// Faccio in modo che la bounding box sia un quadrato e la sposto in base al ridimensionamento
+					/*
+					 if (boundRect[i].width > boundRect[i].height) {
+					 if (boundRect[i].y + boundRect[i].width
+					 <= coloured_img.rows) {
+					 boundRect[i].height = boundRect[i].width;
+					 }
+					 } else {
+					 if (boundRect[i].x + boundRect[i].height
+					 <= coloured_img.cols) {
+					 boundRect[i].width = boundRect[i].height;
+					 }
+					 }
+					 */
 					Mat cropImage = coloured_img(boundRect[i]);
-					Params params(cropImage, img_names[k]);
-					imshow(img_names[k], cropImage);
+					Mat squaredCroppedImg = GetSquareImage(cropImage,
+							cropImage.rows > cropImage.cols ?
+									cropImage.rows : cropImage.cols);
+					Params params(squaredCroppedImg, img_names[k]);
+					imshow(img_names[k], squaredCroppedImg);
 					setMouseCallback(img_names[k], rclick_callback, &params);
 					waitKey();
 				}
@@ -65,6 +83,31 @@ int main(int argc, char** argv) {
 	}
 	waitKey(0);
 	return (0);
+}
+
+Mat GetSquareImage(const Mat& img, int target_width) {
+	int width = img.cols, height = img.rows;
+
+	Mat square = Mat::zeros(target_width, target_width, img.type());
+
+	int max_dim = (width >= height) ? width : height;
+	float scale = ((float) target_width) / max_dim;
+	Rect roi;
+	if (width >= height) {
+		roi.width = target_width;
+		roi.x = 0;
+		roi.height = height * scale;
+		roi.y = (target_width - roi.height) / 2;
+	} else {
+		roi.y = 0;
+		roi.height = target_width;
+		roi.width = width * scale;
+		roi.x = (target_width - roi.width) / 2;
+	}
+
+	resize(img, square(roi), roi.size());
+
+	return square;
 }
 
 void rclick_callback(int event, int x, int y, int flags, void* ptr) {
